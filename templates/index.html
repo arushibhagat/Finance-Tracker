@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Total Spent: ₹{{total}}</h2>
+
+<a href="/add" class="btn btn-primary">+ Add Transaction</a>
+
+<table class="table mt-3">
+    <tr>
+        <th>Date</th>
+        <th>Category</th>
+        <th>Amount</th>
+        <th>Note</th>
+    </tr>
+    {% for t in transactions %}
+    <tr>
+        <td>{{t.date}}</td>
+        <td>{{t.category}}</td>
+        <td>₹{{t.amount}}</td>
+        <td>{{t.note}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
