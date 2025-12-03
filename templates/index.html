@@ -6,20 +6,31 @@
 <a href="/add" class="btn btn-primary">+ Add Transaction</a>
 
 <table class="table mt-3">
-    <tr>
-        <th>Date</th>
-        <th>Category</th>
-        <th>Amount</th>
-        <th>Note</th>
-    </tr>
-    {% for t in transactions %}
-    <tr>
-        <td>{{t.date}}</td>
-        <td>{{t.category}}</td>
-        <td>₹{{t.amount}}</td>
-        <td>{{t.note}}</td>
-    </tr>
-    {% endfor %}
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Note</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for t in transactions %}
+        <tr>
+            <td>{{ t.date }}</td>
+            <td>{{ t.category }}</td>
+            <td>₹{{ t.amount }}</td>
+            <td>{{ t.note }}</td>
+            <td>
+                <a href="/edit/{{t.id}}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a href="/delete/{{t.id}}" class="btn btn-sm btn-outline-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+
 
 {% endblock %}
