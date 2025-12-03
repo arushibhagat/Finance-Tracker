@@ -4,18 +4,58 @@
 <h2>Add Expense</h2>
 <form method="POST">
     <label>Date:</label>
-    <input type="date" name="date" value="{{now}}" required class="form-control">
+    <input type="date" name="date" value="{{ date }}" required class="form-control">
 
     <label>Category:</label>
-    <input type="text" name="category" class="form-control">
+    <div class="d-flex gap-2">
+        <select name="category" class="form-select" required>
+            {% for c in categories %}
+            <option value="{{ c.name }}" {% if c.name==selected %}selected{% endif %}>{{ c.name }}</option>
+
+            {% endfor %}
+        </select>
+    
+        <!-- Button to open modal -->
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#categoryModal">
+            + Add
+        </button>
+    </div>
+
 
     <label>Amount:</label>
-    <input type="number" name="amount" step="0.01" required class="form-control">
+    <input type="number" name="amount" step="0.01" value="{{ amount }}" required class="form-control">
 
     <label>Note:</label>
-    <input type="text" name="note" class="form-control">
+    <input type="text" name="note" value="{{ note }}" class="form-control">
 
     <button class="btn btn-success mt-3">Save</button>
 </form>
+
+<!-- Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" action="/add-category">
+            <input type="hidden" name="date" value="{{ date }}">
+            <input type="hidden" name="amount" value="{{ amount }}">
+            <input type="hidden" name="note" value="{{ note }}">
+
+            
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" name="new_category" class="form-control" placeholder="Enter category name"
+                        required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 
 {% endblock %}

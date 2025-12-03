@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask, render_template, request, redirect
 import sqlite3
 from datetime import datetime
@@ -11,6 +13,7 @@ def get_db():
 
 # Create table if not exists
 with get_db() as db:
+    # Create transactions table
     db.execute("""
     CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,6 +24,23 @@ with get_db() as db:
     );
     """)
 
+    # Create categories table
+    db.execute("""
+    CREATE TABLE IF NOT EXISTS categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL
+    );
+    """)
+
+    # Insert default categories if empty
+    default_categories = ["Food", "Bills", "Transport", "Shopping", "Groceries", "Health", "Subscriptions", "Savings", "Miscellaneous"]
+    for category in default_categories:
+        try:
+            db.execute("INSERT INTO categories (name) VALUES (?)", (category,))
+        except:
+            pass
+
+
 @app.route("/")
 def index():
     db = get_db()
@@ -30,18 +50,28 @@ def index():
 
 @app.route("/add", methods=["GET","POST"])
 def add():
-    if request.method == "POST":
-        date = request.form["date"]
-        category = request.form["category"]
-        amount = float(request.form["amount"])
-        note = request.form["note"]
+    db = get_db()
 
-        db = get_db()
-        db.execute("INSERT INTO transactions (date, category, amount, note) VALUES (?,?,?,?)",
-                   (date, category, amount, note))
+    if request.method == "POST":
+        db.execute(
+            "INSERT INTO transactions (date, category, amount, note) VALUES (?,?,?,?)",
+            (request.form["date"], request.form["category"], request.form["amount"], request.form["note"])
+        )
         db.commit()
         return redirect("/")
-    return render_template("add.html")
+
+    categories = db.execute("SELECT * FROM categories ORDER BY name ASC").fetchall()
+
+    # Get values preserved from redirect
+    selected = request.args.get("selected", "")
+    date = request.args.get("date", datetime.now().strftime("%Y-%m-%d"))
+    amount = request.args.get("amount", "")
+    note = request.args.get("note", "")
+
+    return render_template("add.html", categories=categories, selected=selected, date=date, amount=amount, note=note)
+
+
+
 
 @app.route("/delete/<int:id>")
 def delete(id):
@@ -72,6 +102,23 @@ def edit(id):
     # Fetch existing entry for display
     transaction = db.execute("SELECT * FROM transactions WHERE id=?", (id,)).fetchone()
     return render_template("edit.html", transaction=transaction)
+
+@app.route("/add-category", methods=["POST"])
+def add_category():
+    db = get_db()
+    new_cat = request.form["new_category"]
+    date = request.form.get("date", "")
+    amount = request.form.get("amount", "")
+    note = request.form.get("note", "")
+
+    try:
+        db.execute("INSERT INTO categories (name) VALUES (?)", (new_cat,))
+        db.commit()
+    except:
+        pass
+
+    return redirect(f"/add?selected={new_cat}&date={date}&amount={amount}&note={note}")
+
 
 
 if __name__ == "__main__":
