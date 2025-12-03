@@ -5,6 +5,38 @@
 
 <a href="/add" class="btn btn-primary">+ Add Transaction</a>
 
+<form method="GET" class="row g-2 mb-3">
+
+    <div class="col-md-3">
+        <input type="text" name="search" value="{{ search }}" class="form-control"
+            placeholder="Search notes or category">
+    </div>
+
+    <div class="col-md-3">
+        <select name="filter_category" class="form-select">
+            <option value="">All Categories</option>
+            {% for c in categories %}
+            <option value="{{ c.name }}" {% if c.name==filter_category %}selected{% endif %}>
+                {{ c.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
+    </div>
+
+    <div class="col-md-2">
+        <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Filter</button>
+    </div>
+</form>
+
+
 <table class="table mt-3">
     <thead>
         <tr>

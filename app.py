@@ -44,9 +44,47 @@ with get_db() as db:
 @app.route("/")
 def index():
     db = get_db()
-    transactions = db.execute("SELECT * FROM transactions ORDER BY date DESC").fetchall()
+
+    search = request.args.get("search", "")
+    filter_category = request.args.get("filter_category", "")
+    start_date = request.args.get("start_date", "")
+    end_date = request.args.get("end_date", "")
+
+    query = "SELECT * FROM transactions WHERE 1=1"
+    params = []
+
+    if search:
+        query += " AND (note LIKE ? OR category LIKE ?)"
+        params.extend([f"%{search}%", f"%{search}%"])
+
+    if filter_category:
+        query += " AND category = ?"
+        params.append(filter_category)
+
+    if start_date:
+        query += " AND date >= ?"
+        params.append(start_date)
+
+    if end_date:
+        query += " AND date <= ?"
+        params.append(end_date)
+
+    query += " ORDER BY date DESC"
+
+    transactions = db.execute(query, params).fetchall()
+
     total = db.execute("SELECT SUM(amount) FROM transactions").fetchone()[0] or 0
-    return render_template("index.html", transactions=transactions, total=total)
+    categories = db.execute("SELECT * FROM categories ORDER BY name ASC").fetchall()
+
+    return render_template("index.html",
+                           transactions=transactions,
+                           total=total,
+                           search=search,
+                           filter_category=filter_category,
+                           start_date=start_date,
+                           end_date=end_date,
+                           categories=categories)
+
 
 @app.route("/add", methods=["GET","POST"])
 def add():
