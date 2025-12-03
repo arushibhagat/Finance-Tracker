@@ -43,6 +43,36 @@ def add():
         return redirect("/")
     return render_template("add.html")
 
+@app.route("/delete/<int:id>")
+def delete(id):
+    db = get_db()
+    db.execute("DELETE FROM transactions WHERE id=?", (id,))
+    db.commit()
+    return redirect("/")
+
+@app.route("/edit/<int:id>", methods=["GET", "POST"])
+def edit(id):
+    db = get_db()
+
+    if request.method == "POST":
+        db.execute("""
+            UPDATE transactions 
+            SET date=?, category=?, amount=?, note=? 
+            WHERE id=?
+        """, (
+            request.form["date"],
+            request.form["category"],
+            request.form["amount"],
+            request.form["note"],
+            id
+        ))
+        db.commit()
+        return redirect("/")
+
+    # Fetch existing entry for display
+    transaction = db.execute("SELECT * FROM transactions WHERE id=?", (id,)).fetchone()
+    return render_template("edit.html", transaction=transaction)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
