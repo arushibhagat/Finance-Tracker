@@ -3,6 +3,13 @@
 
 <h2>Add Expense</h2>
 <form method="POST">
+
+    <div class="mb-3">
+        <label class="form-label">Type:</label><br>
+        <input type="radio" name="type" value="income" required> Income
+        <input type="radio" name="type" value="expense" class="ms-3" checked> Expense
+    </div>
+
     <label>Date:</label>
     <input type="date" name="date" value="{{ date }}" required class="form-control">
 
@@ -30,6 +37,7 @@
 
     <button class="btn btn-success mt-3">Save</button>
 </form>
+
 
 <!-- Modal -->
 <div class="modal fade" id="categoryModal" tabindex="-1">

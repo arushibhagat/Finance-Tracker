@@ -11,6 +11,11 @@ def get_db():
 
 # Create tables if not exist
 with get_db() as db:
+    try:
+        db.execute("ALTER TABLE transactions ADD COLUMN type TEXT DEFAULT 'expense'")
+    except:
+        pass
+
     db.execute("""
     CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,6 +130,11 @@ def dashboard():
 
     # Summary Card Values
     total = db.execute("SELECT SUM(amount) FROM transactions").fetchone()[0] or 0
+
+    income = db.execute("SELECT SUM(amount) FROM transactions WHERE type='income'").fetchone()[0] or 0
+    expense = db.execute("SELECT SUM(amount) FROM transactions WHERE type='expense'").fetchone()[0] or 0
+    balance = income - expense
+
     current_month = datetime.now().strftime("%Y-%m")
     monthly_total = db.execute("SELECT SUM(amount) FROM transactions WHERE date LIKE ?", (f"%{current_month}%",)).fetchone()[0] or 0
     top_category_row = db.execute("""
@@ -136,10 +146,11 @@ def dashboard():
     top_category = top_category_row["category"] if top_category_row else "None"
 
     return render_template("dashboard.html",
-                           months=months, month_totals=month_totals,
-                           days=days, day_totals=day_totals,
-                           labels=labels, values=values,
-                           total=total, monthly_total=monthly_total, top_category=top_category)
+                       months=months, month_totals=month_totals,
+                       days=days, day_totals=day_totals,
+                       labels=labels, values=values,
+                       income=income, expense=expense, balance=balance,
+                       total=total, monthly_total=monthly_total, top_category=top_category)
 
 
 # ------------------ ADD TRANSACTION ------------------
@@ -149,9 +160,10 @@ def add():
 
     if request.method == "POST":
         db.execute(
-            "INSERT INTO transactions (date, category, amount, note) VALUES (?,?,?,?)",
-            (request.form["date"], request.form["category"], request.form["amount"], request.form["note"])
-        )
+    "INSERT INTO transactions (date, category, amount, note, type) VALUES (?,?,?,?,?)",
+    (request.form["date"], request.form["category"], request.form["amount"], request.form["note"], request.form["type"])
+)
+
         db.commit()
         return redirect("/history?toast=added")
 

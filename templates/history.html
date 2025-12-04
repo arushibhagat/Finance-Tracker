@@ -54,7 +54,10 @@
         <tr>
             <td>{{ t.date }}</td>
             <td>{{ t.category }}</td>
-            <td>₹{{ t.amount }}</td>
+            <td class="{% if t.type=='income' %}text-success{% else %}text-danger{% endif %}">
+                {% if t.type=='income' %}+{% else %}-{% endif %}₹{{ t.amount }}
+            </td>
+
             <td>{{ t.note }}</td>
             <td>
                 <a href="/edit/{{t.id}}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
