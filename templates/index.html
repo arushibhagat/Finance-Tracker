@@ -89,25 +89,6 @@
     </tbody>
 </table>
 
-<!-- Pie Chart -->
-<div class="card shadow-sm p-4 mb-4">
-    <h5 class="text-center">Spending by Category</h5>
-    <canvas id="categoryChart" style="max-height: 350px;"></canvas>
-</div>
 
-<!-- Chart.js Script for Pie Chart -->
-<script>
-    const ctx = document.getElementById('categoryChart');
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: {{ labels| tojson }},
-        datasets: [{
-            data: {{ values| tojson }},
-        borderWidth: 1
-        }]
-    }
-});
-</script>
 
 {% endblock %}

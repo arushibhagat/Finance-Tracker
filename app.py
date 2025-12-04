@@ -40,9 +40,14 @@ with get_db() as db:
         except:
             pass
 
+from flask import redirect, url_for
 
 @app.route("/")
-def index():
+def home():
+    return redirect(url_for("dashboard"))
+
+@app.route("/history")
+def history():
     db = get_db()
 
     # existing filter handling
@@ -105,6 +110,7 @@ def index():
                            labels=labels,
                            values=values
                             )
+
 
 @app.route("/dashboard")
 def dashboard():
