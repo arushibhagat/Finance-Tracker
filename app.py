@@ -47,6 +47,7 @@ def home():
 def history():
     db = get_db()
 
+    # Filters
     search = request.args.get("search", "")
     filter_category = request.args.get("filter_category", "")
     start_date = request.args.get("start_date", "")
@@ -74,16 +75,39 @@ def history():
     query += " ORDER BY date DESC"
     transactions = db.execute(query, params).fetchall()
 
+    # ---- TOTAL CALCULATION ----
+    total = db.execute("SELECT SUM(amount) FROM transactions").fetchone()[0] or 0
+
+    # this month
+    current_month = datetime.now().strftime("%Y-%m")
+    monthly_total = db.execute("SELECT SUM(amount) FROM transactions WHERE date LIKE ?", (f"%{current_month}%",)).fetchone()[0] or 0
+
+    # top category
+    top_category_row = db.execute("SELECT category, SUM(amount) AS total FROM transactions GROUP BY category ORDER BY total DESC LIMIT 1").fetchone()
+    top_category = top_category_row["category"] if top_category_row else "None"
+
     categories = db.execute("SELECT * FROM categories ORDER BY name ASC").fetchall()
 
-    return render_template("history.html",
-                           transactions=transactions,
-                           search=search,
-                           filter_category=filter_category,
-                           start_date=start_date,
-                           end_date=end_date,
-                           categories=categories)
+    # chart
+    cat_data = db.execute("SELECT category, SUM(amount) as total FROM transactions GROUP BY category").fetchall()
+    labels = [row["category"] for row in cat_data]
+    values = [row["total"] for row in cat_data]
 
+    # ---- RETURN PAGE ----
+    return render_template(
+        "history.html",
+        transactions=transactions,
+        total=total,
+        monthly_total=monthly_total,
+        top_category=top_category,
+        search=search,
+        filter_category=filter_category,
+        start_date=start_date,
+        end_date=end_date,
+        categories=categories,
+        labels=labels,
+        values=values,
+    )
 
 # ------------------ DASHBOARD PAGE ------------------
 @app.route("/dashboard")
@@ -207,6 +231,56 @@ def add_category():
         pass
 
     return redirect(f"/add?selected={new_cat}&date={date}&amount={amount}&note={note}")
+
+
+# ------------------ EXPORT CSV ------------------
+import csv
+from flask import Response
+
+@app.route("/export")
+def export():
+    db = get_db()
+
+    # Read filters
+    search = request.args.get("search", "")
+    filter_category = request.args.get("filter_category", "")
+    start_date = request.args.get("start_date", "")
+    end_date = request.args.get("end_date", "")
+
+    query = "SELECT * FROM transactions WHERE 1=1"
+    params = []
+
+    if search:
+        query += " AND (note LIKE ? OR category LIKE ?)"
+        params.extend([f"%{search}%", f"%{search}%"])
+
+    if filter_category:
+        query += " AND category = ?"
+        params.append(filter_category)
+
+    if start_date:
+        query += " AND date >= ?"
+        params.append(start_date)
+
+    if end_date:
+        query += " AND date <= ?"
+        params.append(end_date)
+
+    query += " ORDER BY date DESC"
+    transactions = db.execute(query, params).fetchall()
+
+    # Generate CSV data
+    def generate():
+        data = "Date,Type,Category,Amount,Note\n"
+        for t in transactions:
+            data += f"{t['date']},{t['type']},{t['category']},{t['amount']},{t['note']}\n"
+        return data
+
+    return Response(
+        generate(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=transactions_filtered.csv"}
+    )
 
 
 # ------------------ MAIN ------------------

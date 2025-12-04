@@ -31,10 +31,17 @@
         <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
     </div>
 
-    <div class="col-md-3 d-flex gap-2">
-        <button class="btn btn-primary w-100" type="submit">Filter</button>
-        <a href="/history" class="btn btn-secondary w-100">Reset</a>
+    <div class="col-md-3">
+        <div class="d-flex gap-2 justify-content-end">
+            <button class="btn btn-primary" type="submit">Filter</button>
+            <a href="/" class="btn btn-secondary">Reset</a>
+            <a href="/export?search={{ search }}&filter_category={{ filter_category }}&start_date={{ start_date }}&end_date={{ end_date }}"
+                class="btn btn-success">📥 Export</a>
+        </div>
     </div>
+
+
+
 </form>
 
 <!-- Transactions Table -->
