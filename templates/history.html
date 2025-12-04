@@ -7,31 +7,7 @@
     <a href="/add" class="btn btn-primary">+ Add Transaction</a>
 </div>
 
-<!-- Summary Cards Row -->
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card shadow-sm p-3 text-center h-100">
-            <h6>Total Spent</h6>
-            <h3>₹{{ total }}</h3>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card shadow-sm p-3 text-center h-100">
-            <h6>This Month</h6>
-            <h3>₹{{ monthly_total }}</h3>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card shadow-sm p-3 text-center h-100">
-            <h6>Top Category</h6>
-            <h3>{{ top_category }}</h3>
-        </div>
-    </div>
-</div>
-
-<!-- Filters Row (placed above table) -->
+<!-- Filters Row  -->
 <form method="GET" class="row g-2 mb-4">
     <div class="col-md-3">
         <input type="text" name="search" value="{{ search }}" class="form-control"
@@ -57,7 +33,7 @@
 
     <div class="col-md-3 d-flex gap-2">
         <button class="btn btn-primary w-100" type="submit">Filter</button>
-        <a href="/" class="btn btn-secondary w-100">Reset</a>
+        <a href="/history" class="btn btn-secondary w-100">Reset</a>
     </div>
 </form>
 
@@ -81,14 +57,26 @@
             <td>₹{{ t.amount }}</td>
             <td>{{ t.note }}</td>
             <td>
-                <a href="/edit/{{t.id}}" class="btn btn-sm btn-outline-primary">Edit</a>
-                <a href="/delete/{{t.id}}" class="btn btn-sm btn-outline-danger">Delete</a>
+                <a href="/edit/{{t.id}}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                    <i class="bi bi-pencil-fill"></i>
+                </a>
+                <a href="/delete/{{t.id}}" class="btn btn-sm btn-outline-danger" title="Delete"
+                    onclick="return confirm('Are you sure you want to delete this transaction?');">
+                    <i class="bi bi-trash-fill"></i>
+                </a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
+{% if request.args.get('toast') == 'added' %}
+<script> showToast("Transaction Added Successfully!"); </script>
+{% elif request.args.get('toast') == 'updated' %}
+<script> showToast("Transaction Updated Successfully!"); </script>
+{% elif request.args.get('toast') == 'deleted' %}
+<script> showToast("Transaction Deleted Successfully!"); </script>
+{% endif %}
 
 
 {% endblock %}

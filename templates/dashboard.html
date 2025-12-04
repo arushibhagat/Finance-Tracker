@@ -3,8 +3,35 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Analytics Dashboard</h1>
-    <a href="/" class="btn btn-outline-dark">← Back to Home</a>
 </div>
+
+<!-- SUMMARY CARDS -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm p-3 text-center h-100">
+            <i class="bi bi-wallet2" style="font-size: 36px;"></i>
+            <h6>Total Spent</h6>
+            <h3>{{ total }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm p-3 text-center h-100">
+            <i class="bi bi-calendar3" style="font-size: 36px;"></i>
+            <h6>This Month</h6>
+            <h3>{{ monthly_total }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm p-3 text-center h-100">
+            <i class="bi bi-pie-chart" style="font-size: 36px;"></i>
+            <h6>Top Category</h6>
+            <h3>{{ top_category }}</h3>
+        </div>
+    </div>
+</div>
+
 
 <!-- Bar Chart -->
 <div class="card shadow-sm p-4 mb-4">
