@@ -106,6 +106,47 @@ def index():
                            values=values
                             )
 
+@app.route("/dashboard")
+def dashboard():
+    db = get_db()
+
+    # Monthly totals for bar chart
+    monthly_data = db.execute("""
+        SELECT substr(date, 1, 7) AS month, SUM(amount) AS total
+        FROM transactions
+        GROUP BY month
+        ORDER BY month ASC
+    """).fetchall()
+
+    months = [row["month"] for row in monthly_data]
+    month_totals = [row["total"] for row in monthly_data]
+
+    # Daily spending trend
+    daily_data = db.execute("""
+        SELECT date, SUM(amount) AS total
+        FROM transactions
+        GROUP BY date
+        ORDER BY date ASC
+    """).fetchall()
+
+    days = [row["date"] for row in daily_data]
+    day_totals = [row["total"] for row in daily_data]
+
+    # Category pie chart data
+    cat_data = db.execute("""
+        SELECT category, SUM(amount) as total FROM transactions 
+        GROUP BY category ORDER BY total DESC
+    """).fetchall()
+
+    labels = [row["category"] for row in cat_data]
+    values = [row["total"] for row in cat_data]
+
+    return render_template("dashboard.html",
+                           months=months, month_totals=month_totals,
+                           days=days, day_totals=day_totals,
+                           labels=labels, values=values)
+
+
 @app.route("/add", methods=["GET","POST"])
 def add():
     db = get_db()

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Analytics Dashboard</h1>
+    <a href="/" class="btn btn-outline-dark">← Back to Home</a>
+</div>
+
+<!-- Bar Chart -->
+<div class="card shadow-sm p-4 mb-4">
+    <h4 class="text-center">Monthly Spending Trend</h4>
+    <canvas id="barChart" style="max-height: 350px;"></canvas>
+</div>
+
+<!-- Line Chart -->
+<div class="card shadow-sm p-4 mb-4">
+    <h4 class="text-center">Daily Expense Trend</h4>
+    <canvas id="lineChart" style="max-height: 350px;"></canvas>
+</div>
+
+<!-- Category pie chart -->
+<div class="card shadow-sm p-4 mb-4">
+    <h4 class="text-center">Spending by Category</h4>
+    <canvas id="categoryChart" style="max-height: 350px;"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Monthly Bar Chart
+    new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ months| tojson }},
+        datasets: [{
+            label: "Total Spent",
+            data: {{ month_totals| tojson }},
+        borderWidth: 1
+        }]
+    }
+});
+
+    // Daily Line Chart
+    new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: {{ days| tojson }},
+        datasets: [{
+            label: "Daily Spending",
+            data: {{ day_totals| tojson }},
+        borderWidth: 1,
+        fill: false
+        }]
+    }
+});
+
+    // Category Pie Chart
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'pie',
+        data: {
+            labels: {{ labels| tojson }},
+        datasets: [{
+            data: {{ values| tojson }},
+        borderWidth: 1
+        }]
+    }
+});
+</script>
+
+{% endblock %}
