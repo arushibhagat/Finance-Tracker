@@ -45,6 +45,7 @@ with get_db() as db:
 def index():
     db = get_db()
 
+    # existing filter handling
     search = request.args.get("search", "")
     filter_category = request.args.get("filter_category", "")
     start_date = request.args.get("start_date", "")
@@ -70,21 +71,40 @@ def index():
         params.append(end_date)
 
     query += " ORDER BY date DESC"
-
     transactions = db.execute(query, params).fetchall()
 
+    # total spent overall
     total = db.execute("SELECT SUM(amount) FROM transactions").fetchone()[0] or 0
+
+    # total spent this month
+    current_month = datetime.now().strftime("%Y-%m")
+    monthly_total = db.execute("SELECT SUM(amount) FROM transactions WHERE date LIKE ?", (f"%{current_month}%",)).fetchone()[0] or 0
+
+    # top category
+    top_category_row = db.execute("SELECT category, SUM(amount) AS total FROM transactions GROUP BY category ORDER BY total DESC LIMIT 1").fetchone()
+    top_category = top_category_row["category"] if top_category_row else "None"
+
     categories = db.execute("SELECT * FROM categories ORDER BY name ASC").fetchall()
+
+    # Build chart data
+    cat_data = db.execute("SELECT category, SUM(amount) as total FROM transactions GROUP BY category").fetchall()
+    labels = [row["category"] for row in cat_data]
+    values = [row["total"] for row in cat_data]
+
 
     return render_template("index.html",
                            transactions=transactions,
                            total=total,
+                           monthly_total=monthly_total,
+                           top_category=top_category,
                            search=search,
                            filter_category=filter_category,
                            start_date=start_date,
                            end_date=end_date,
-                           categories=categories)
-
+                           categories=categories,
+                           labels=labels,
+                           values=values
+                            )
 
 @app.route("/add", methods=["GET","POST"])
 def add():
